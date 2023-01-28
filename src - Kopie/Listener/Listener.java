@@ -1,0 +1,187 @@
+package Listener;
+
+import java.util.ArrayList;
+
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByBlockEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.util.Vector;
+
+import data.FFA_me;
+import data.FFA_sta;
+import data.clear;
+import events.EnderPearlThrowEvent;
+import net.minecraft.server.v1_8_R3.EntityPlayer;
+import net.minecraft.server.v1_8_R3.PacketPlayInClientCommand;
+import net.minecraft.server.v1_8_R3.PacketPlayInClientCommand.EnumClientCommand;
+
+public class Listener implements org.bukkit.event.Listener {
+	static ArrayList<Player> hidden = new ArrayList<Player>();
+	@EventHandler
+	public static void onJoin(PlayerJoinEvent e) {
+		Player p = e.getPlayer();
+		if(p.hasPermission("ffa.join")) {
+			p.setFoodLevel(20);
+			e.setJoinMessage(null);
+			if(!p.hasPermission("set.qm")) {
+				p.setGameMode(GameMode.SURVIVAL);
+			}
+			for(Player all : Bukkit.getOnlinePlayers()){
+				p.showPlayer(all);
+				hidden.remove(p);
+		}
+	    }
+	}
+	@EventHandler(priority = EventPriority.HIGHEST)
+    public void onEntityDamageEvent(final EntityDamageEvent e) {
+        if (!(e.getEntity() instanceof Player)) {
+            return;
+        }
+        Player p = (Player) e.getEntity();
+        if (e.getCause() == DamageCause.FALL) {
+                if(p.hasPermission("ffa.join")) {
+                	e.setCancelled(true);
+                }
+        }
+	}
+	@EventHandler
+	public void onEntityDamage(EntityDamageEvent e){
+		Player p = (Player) e.getEntity();
+		 Location loc = p.getLocation();
+		 int y = loc.getBlockY();
+		if(y < 40) {
+		e.setCancelled(false);
+		}else {
+		e.setCancelled(true);
+		}
+	}
+	
+	@EventHandler
+	public void onEntityDamage(EntityDamageByBlockEvent e){
+		Entity p = e.getEntity();
+		 Location loc = p.getLocation();
+		 int y = loc.getBlockY();
+		if(y < 40) {
+		e.setCancelled(false);
+		}else {
+		e.setCancelled(true);
+		}
+	}
+	@EventHandler
+	public void onEntityDamage(EntityDamageByEntityEvent e){
+		Entity p = e.getEntity();
+		 Location loc = p.getLocation();
+		 int y = loc.getBlockY();
+		if(y < 40) {
+		e.setCancelled(false);
+		}else {
+		e.setCancelled(true);
+		}
+	}
+	public void onInteract(PlayerInteractEvent e){
+	Player p = e.getPlayer();
+	 Location loc = p.getLocation();
+	 int y = loc.getBlockY();
+		if(p.getGameMode() == GameMode.CREATIVE){
+			e.setCancelled(false);
+		}else{
+			if(y > 40) {
+			e.setCancelled(true);
+		}
+		}
+	}
+	@EventHandler
+	public void onIn(InventoryClickEvent e){
+		Player p = (Player)e.getWhoClicked();
+		if(p.getGameMode() == GameMode.CREATIVE){
+			e.setCancelled(false);
+		}else{
+			e.setCancelled(true);
+		}
+	}
+	@EventHandler
+	public void onDro(PlayerDropItemEvent e){
+		Player p = e.getPlayer();
+		if(p.getGameMode() == GameMode.CREATIVE){
+			e.setCancelled(false);
+		}else{
+			e.setCancelled(true);
+		}
+	}
+	@EventHandler
+	public void onDdd(FoodLevelChangeEvent e){
+		e.setCancelled(true);
+	}
+	@EventHandler
+	public void onBlock(BlockPlaceEvent e){
+		Player p = e.getPlayer();
+		if(p.getGameMode() == GameMode.CREATIVE && p.hasPermission("lobbysystem.build")){
+			e.setCancelled(false);
+		}else{
+			e.setCancelled(true);
+		}
+	}
+	@EventHandler
+	public void onBlockBreak(BlockBreakEvent e){
+		Player p = e.getPlayer();
+		if(p.getGameMode() == GameMode.CREATIVE && p.hasPermission("lobbysystem.build")){
+			e.setCancelled(false);
+		}else{
+			e.setCancelled(true);
+		}
+	
+}
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent e){
+        Player p = e.getEntity();
+        Player d = p.getKiller();
+        p.setExp(0);
+        d.giveExpLevels(1);
+        d.setHealth(20);
+        p.getInventory().clear();
+        FFA_me.setFFAItems(d);
+        FFA_sta.setFFAstartItems(p);
+        clear.cleararmor(p);
+        e.setDeathMessage(null);
+        PacketPlayInClientCommand in = new PacketPlayInClientCommand(EnumClientCommand.PERFORM_RESPAWN);
+        EntityPlayer cPlayer = ((CraftPlayer)p).getHandle();
+        cPlayer.playerConnection.a(in);
+        p.setVelocity(null);
+    }
+    @EventHandler
+    public void onEnderPearlThrowEvent(EnderPearlThrowEvent e) {
+    	Entity i = e.getPearl();
+    	Vector vector1 = i.getVelocity();
+    	if(vector1.getY() == 35) {
+    		i.remove();
+    	}
+    	
+    }
+    @EventHandler
+    public void onArrowshoot(EntityShootBowEvent e) {
+    	Entity m = e.getProjectile();
+    	Vector vector = m.getVelocity();
+    	 if (vector.getX() == 0 && vector.getY() == 0 && vector.getZ() == 0 ) {
+    		 m.remove();
+    		 }
+    }
+}       
+    
