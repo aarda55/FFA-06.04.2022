@@ -4,8 +4,23 @@ version: 0.6
 author: Adderino55
 commands:
    FFA1:
+    permission: ffa.admin
+    usage: §c/ffa1
+    description: Sets the 1st FFA Spawn
    FFA2:
+    permission: ffa.admin
+    usage: §c/ffa2
+    description: Sets the 2nd FFA Spawn
    FFA3:
+    permission: ffa.admin
+    usage: §c/ffa3
+    description: Sets the 3rd FFA Spawn
    FFA4:
+    permission: ffa.admin
+    usage: §c/ffa4
+    description: Sets the 4th FFA Spawn
    FFA5:
+    permission: ffa.admin
+    usage: §c/ffa5
+    description: Sets the 5th FFA Spawn
    
